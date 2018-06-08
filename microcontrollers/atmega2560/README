@@ -1,0 +1,10 @@
+- you need to use an arduino mega 2560 compatible board
+- install the arduino toolchain
+	sudo apt-get install arduino
+
+- to compile
+  make
+
+- to upload a program
+  make <program>.hex
+
