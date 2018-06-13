@@ -1,13 +1,15 @@
-# os_project
+# os_project [SENSOR LOGGER IN ARDUINO]
 
 Authors:
 	Paolo Rollo, Matricola 1713885
 	Ludovico Lowe, Matricola 1707235
 Students @Sapienza, University of Rome.
 
-Without using the Arduino IDE (so using bare metal programming in AVR C), we are going to implement a system to read one or more sensors (like digital pins), and to deliver
-binary messages to the PC, following a binary protocol. On the PC, we're going to implement a program to interact with the Arduino to display
-the incoming messages.
+Using bare metal programming in AVR C (so without intermediating with the Arduino IDE/Libraries), we are going to implement a system to read one or more sensors (like temperature..), and to deliver, when requested, the registrated data to the PC using a binary packet protocol.
+On the PC, we're going to implement a program to interact with the Arduino to:
+-set the parameters of the sensor(s).
+-send requests of getting the data registrated till the moment.
+-display the incoming messages.
 
 
 ## Specifiche del progetto
