@@ -7,84 +7,98 @@ const Pin pins[] =
     {
       .in_register=&PINE,
       .out_register=&PORTE,
-      .dir_register=&DDRE
+      .dir_register=&DDRE,
+      .bit=0
     },
     //1
     {
       .in_register=&PINE,
       .out_register=&PORTE,
-      .dir_register=&DDRE
+      .dir_register=&DDRE,
+      .bit=1
     },
     //2
     {
       .in_register=&PINE,
       .out_register=&PORTE,
-      .dir_register=&DDRE
+      .dir_register=&DDRE,
+      .bit=4
     },
     //3
     {
       .in_register=&PINE,
       .out_register=&PORTE,
-      .dir_register=&DDRE
+      .dir_register=&DDRE,
+      .bit=5
     },
     //4
     {
       .in_register=&PING,
       .out_register=&PORTG,
-      .dir_register=&DDRG
+      .dir_register=&DDRG,
+      .bit=5
     },
     //5
     {
       .in_register=&PINE,
       .out_register=&PORTE,
-      .dir_register=&DDRE
+      .dir_register=&DDRE,
+      .bit=3
     },
     //6
     {
       .in_register=&PINH,
       .out_register=&PORTH,
-      .dir_register=&DDRH
+      .dir_register=&DDRH,
+      .bit=3
     },
     //7
     {
       .in_register=&PINH,
       .out_register=&PORTH,
-      .dir_register=&DDRH
+      .dir_register=&DDRH,
+      .bit=4
     },
     //8
     {
       .in_register=&PINH,
       .out_register=&PORTH,
-      .dir_register=&DDRH
+      .dir_register=&DDRH,
+      .bit=5
     },
     //9
     {
       .in_register=&PINH,
       .out_register=&PORTH,
-      .dir_register=&DDRH
+      .dir_register=&DDRH,
+      .bit=6
     },
     //10
     {
       .in_register=&PINB,
       .out_register=&PORTB,
-      .dir_register=&DDRB
+      .dir_register=&DDRB,
+      .bit=4
     },
     //11
     {
       .in_register=&PINB,
       .out_register=&PORTB,
-      .dir_register=&DDRB
+      .dir_register=&DDRB,
+      .bit=5
     },
     //12
     {
       .in_register=&PINB,
       .out_register=&PORTB,
-      .dir_register=&DDRB
+      .dir_register=&DDRB,
+      .bit=6
     },
     //13
     {
       .in_register=&PINB,
       .out_register=&PORTB,
-      .dir_register=&DDRB
+      .dir_register=&DDRB,
+      .bit=7
     }
   };
