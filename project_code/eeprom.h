@@ -1,9 +1,15 @@
 #pragma once
 #include <stdint.h>
 
-// initializes the eeprom subsystem
-void EEPROM_init(void);
-// reads in dest size bytes starting from eeprom location src
-void EEPROM_read(void* dest, const uint16_t src, uint16_t size);
-// writes starting from eeprom location dest size bytes from src
-void EEPROM_write(uint16_t dest, const void* src,  uint16_t size);
+typedef struct {
+  volatile uint8_t b_start;
+  volatile uint8_t b_end;
+  volatile uint8_t b_size;
+} EEPROM_SPACE;
+
+// initializes the eeprom subsystem so that write/read operations will work on a ring buffer
+struct EEPROM_SPACE* EEPROM_init(void);
+// reads in dest size bytes from eeprom ring buffer
+void EEPROM_read(void* dest, struct EEPROM_SPACE* eeprom, uint16_t size);
+// writes in eeprom ring buffer size bytes from src
+void EEPROM_write(struct EEPROM_SPACE* eeprom, const void* src,  uint16_t size);
