@@ -69,16 +69,6 @@ struct UART* UART_init(const char* device __attribute__((unused)), uint32_t baud
   return &uart_0;
 }
 
-// returns the free space in the buffer
-int UART_rxbufferSize(struct UART* uart __attribute__((unused))) {
-  return BUFFER_SIZE;
-}
-
-// returns the free occupied space in the buffer
-int  UART_txBufferSize(struct UART* uart __attribute__((unused))) {
-  return BUFFER_SIZE;
-}
-
 // number of chars available in rx buffer
 int UART_rxBufferAvailable(UART* uart) {
   return uart->rx_size;
@@ -99,7 +89,7 @@ int UART_txBufferLeft(UART* uart){
   return BUFFER_SIZE - uart->tx_size;
 }
 
-void UART_putChar(struct UART* uart, uint8_t c) {
+void UART_putByte(struct UART* uart, uint8_t x) {
   while (uart->tx_size>=BUFFER_SIZE);  //until there is some space in the buffer
   ATOMIC_BLOCK(ATOMIC_FORCEON){
     uart->tx_buffer[uart->tx_end]=c;
@@ -108,21 +98,21 @@ void UART_putChar(struct UART* uart, uint8_t c) {
   UCSR0B |= _BV(UDRIE0); // enable transmit interrupt
 }
 
-uint8_t UART_getChar(struct UART* uart){
+uint8_t UART_getByte(struct UART* uart){
   while(uart->rx_size==0);  //untill there is nothing to read in the buffer
-  uint8_t c;
+  uint8_t x;
   ATOMIC_BLOCK(ATOMIC_FORCEON){
     c=uart->rx_buffer[uart->rx_start];
     BUFFER_GET(uart->rx, BUFFER_SIZE);
   }
-  return c;
+  return x;
 }
 
 
 ISR(USART0_RX_vect) {
-  uint8_t c=UDR0;
+  uint8_t x=UDR0;
   if (uart_0.rx_size<BUFFER_SIZE){
-    uart_0.rx_buffer[uart_0.rx_end] = c;
+    uart_0.rx_buffer[uart_0.rx_end] = x;
     BUFFER_PUT(uart_0.rx, BUFFER_SIZE);
   }
 }
