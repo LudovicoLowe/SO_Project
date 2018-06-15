@@ -2,6 +2,12 @@
 #include "buffer_utils.h"
 #include "avr/eeprom.h"
 
+typedef struct EEPROM_SPACE{
+  volatile uint8_t b_start;
+  volatile uint8_t b_end;
+  volatile uint8_t b_size;
+} EEPROM_SPACE;
+
 struct EEPROM_SPACE* EEPROM_init(void){
   struct EEPROM_SPACE eeprom;
 

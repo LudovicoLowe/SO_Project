@@ -1,11 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-typedef struct {
-  volatile uint8_t b_start;
-  volatile uint8_t b_end;
-  volatile uint8_t b_size;
-} EEPROM_SPACE;
+typedef struct EEPROM_SPACE;
 
 // initializes the eeprom subsystem so that write/read operations will work on a ring buffer
 struct EEPROM_SPACE* EEPROM_init(void);
