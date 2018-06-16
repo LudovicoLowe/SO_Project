@@ -3,6 +3,7 @@
 #include "avr/eeprom.h"
 
 typedef struct{
+  volatile unit8_t LOG_NUMBER;
   volatile uint8_t b_start;
   volatile uint8_t b_end;
   volatile uint8_t b_size;

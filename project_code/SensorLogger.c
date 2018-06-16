@@ -18,14 +18,14 @@ void send(void* packet){
 }
 
 void timerFn(void* args){
-  struct LOG log;
+  struct LOG* log;
+  log->n=eeprom->LOG_NUMBER;
   log->temperature= *(args->temperature);
   log->humidity= *(args->humidity);
   log->msg="LOG 0: fa 18° a giugno porco il dio";
-
+  ++eeprom->LOG_NUMBER;
   //write logs in eeprom
   EEPROM_write(eeprom, &log, sizeof(LOG));
-  _delay_ms(1000); //wait 1 sec
 }
 
 int main (void) {
