@@ -1,7 +1,25 @@
 #include <stdio.h>
 #include <string.h>
 #include "serial_linux.h"
-#include "protocol.h"
+#include "client_protocol.h"
+
+typedef struct LOG{
+  int temperature;
+  int humidity;
+} LOG;
+static int LOG_SIZE=sizeof(LOG);
+
+typedef enum {
+  SetTimer=0x1,
+  LogRequest=0x2,
+  LogSent=0x3
+} Type;
+
+typedef struct {
+  Type type;
+  LOG log;
+  //timer set up
+} Packet;
 
 int main(int argc, char** argv){
   if (argc < 1) {
@@ -21,4 +39,6 @@ int main(int argc, char** argv){
     printf("Failed\n");
     exit(-1);
   }
+
+  //....
 }

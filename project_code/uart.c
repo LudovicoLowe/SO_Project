@@ -89,7 +89,7 @@ int UART_txBufferLeft(UART* uart){
   return BUFFER_SIZE - uart->tx_size;
 }
 
-void UART_putByte(struct UART* uart, uint8_t x) {
+void UART_putChar(struct UART* uart, uint8_t c) {
   while (uart->tx_size>=BUFFER_SIZE);  //until there is some space in the buffer
   ATOMIC_BLOCK(ATOMIC_FORCEON){
     uart->tx_buffer[uart->tx_end]=c;
@@ -98,21 +98,21 @@ void UART_putByte(struct UART* uart, uint8_t x) {
   UCSR0B |= _BV(UDRIE0); // enable transmit interrupt
 }
 
-uint8_t UART_getByte(struct UART* uart){
+uint8_t UART_getChar(struct UART* uart){
   while(uart->rx_size==0);  //untill there is nothing to read in the buffer
-  uint8_t x;
+  uint8_t c;
   ATOMIC_BLOCK(ATOMIC_FORCEON){
     c=uart->rx_buffer[uart->rx_start];
     BUFFER_GET(uart->rx, BUFFER_SIZE);
   }
-  return x;
+  return c;
 }
 
 
 ISR(USART0_RX_vect) {
-  uint8_t x=UDR0;
+  uint8_t c=UDR0;
   if (uart_0.rx_size<BUFFER_SIZE){
-    uart_0.rx_buffer[uart_0.rx_end] = x;
+    uart_0.rx_buffer[uart_0.rx_end] = c;
     BUFFER_PUT(uart_0.rx, BUFFER_SIZE);
   }
 }

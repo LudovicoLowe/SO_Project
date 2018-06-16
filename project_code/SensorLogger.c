@@ -7,20 +7,14 @@
 #include "eeprom.h"
 #include "uart.h"
 #include "timer.h"
+#include "protocol.h"
 
 struct UART* uart;
 struct EEPROM_SPACE* eeprom;
 
-typedef struct LOG{
-  char msg[128];
-  int temperature;
-  int humidity;
-} LOG;
-static int LOG_SIZE=sizeof(LOG);
-
 void send(void* packet){
   in dim=sizeof(packet);
-  for(int i=0; i<dim; ++i) UART_putByte(uart, (uint8_t)* packet);
+  for(int i=0; i<dim; ++i) UART_putChar(uart, (uint8_t)* packet);
 }
 
 void timerFn(void* args){
@@ -61,7 +55,7 @@ int main (void) {
     if (0) {
       //read logs in eeprom
       memset(eeprom_buffer, 0, BUFFER_SIZE);  //clear the buffer where we read the log to, each time
-      EEPROM_read(eeprom_buffer, eeprom, LOG_SIZE);
+      EEPROM_read(eeprom_buffer, eeprom, sizeof(LOG));
       _delay_ms(1000); //wait 1 sec
     }
     //

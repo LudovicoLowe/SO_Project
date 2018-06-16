@@ -7,7 +7,7 @@
 // its 16 bit and allows us a decent resolution
 
 
-typedef struct Timer{
+typedef struct{
   uint16_t duration_ms;
   TimerFn fn;
   void* args;

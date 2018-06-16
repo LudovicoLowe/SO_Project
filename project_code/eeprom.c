@@ -2,20 +2,23 @@
 #include "buffer_utils.h"
 #include "avr/eeprom.h"
 
-typedef struct EEPROM_SPACE{
+typedef struct{
   volatile uint8_t b_start;
   volatile uint8_t b_end;
   volatile uint8_t b_size;
 } EEPROM_SPACE;
 
+static struct EEPROM_SPACE eeprom_s;
+
 struct EEPROM_SPACE* EEPROM_init(void){
-  struct EEPROM_SPACE eeprom;
+  struct EEPROM_SPACE* eeprom=&eeprom_s;
+  memset(eeprom, 0, sizeof(EEPROM_SPACE));
 
   eeprom->b_start=0;
   eeprom->b_end=0;
   eeprom->b_size=0;
 
-  return &eeprom;
+  return eeprom;
 }
 
 void EEPROM_read(void* dest, struct EEPROM_SPACE* eeprom, uint16_t size){
