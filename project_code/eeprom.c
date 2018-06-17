@@ -12,9 +12,10 @@ typedef struct{
 static struct EEPROM_SPACE eeprom_s;
 
 struct EEPROM_SPACE* EEPROM_init(void){
+  //memset(eeprom, 0, sizeof(EEPROM_SPACE));
   struct EEPROM_SPACE* eeprom=&eeprom_s;
-  memset(eeprom, 0, sizeof(EEPROM_SPACE));
 
+  eeprom->LOG_NUMBER=0;
   eeprom->b_start=0;
   eeprom->b_end=0;
   eeprom->b_size=0;
@@ -37,7 +38,7 @@ void EEPROM_read(void* dest, struct EEPROM_SPACE* eeprom, uint16_t size){
   }
 }
 
-void EEPROM_write(struct EEPROM_SPACE* eeprom, const void* src,  uint16_t size){
+void EEPROM_write(const void* src, struct EEPROM_SPACE* eeprom, uint16_t size){
   const uint8_t * s=(uint8_t*)src;
   const uint8_t * end=s+size;
   while(s<end){

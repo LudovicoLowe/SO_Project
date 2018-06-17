@@ -41,32 +41,39 @@ typedef struct {
   volatile uint8_t rx_size;
 
   int baud;
-  int uart_num; // hardware uart;
 } UART;
 
-static UART uart_0;
+static UART uart;
 
-struct UART* UART_init(const char* device __attribute__((unused)), uint32_t baud) {
-  UART* uart=&uart_0;
-  uart->uart_num=0;
+struct UART* UART_init(uint32_t baud) {
+  UART* u=&uart;
 
   switch(baud){
-  case 57600: setBaud57600(); break;
-  case 115200: setBaud115200(); break;
+  case 57600:
+    {
+      setBaud57600();
+      u->baud=57600;
+      break;
+  case 115200:
+    {
+      setBaud115200();
+      u->baud=115200;
+      break;
+    }
   default: return 0;
   }
 
-  uart->tx_start=0;
-  uart->tx_end=0;
-  uart->tx_size=0;
-  uart->rx_start=0;
-  uart->rx_end=0;
-  uart->rx_size=0;
+  u->tx_start=0;
+  u->tx_end=0;
+  u->tx_size=0;
+  u->rx_start=0;
+  u->rx_end=0;
+  u->rx_size=0;
 
   UCSR0C = _BV(UCSZ01) | _BV(UCSZ00); /* 8-bit data */
   UCSR0B = _BV(RXEN0) | _BV(TXEN0) | _BV(RXCIE0);   /* Enable RX and TX */
   sei();
-  return &uart_0;
+  return u;
 }
 
 void UART_putChar(struct UART* uart, uint8_t c) {

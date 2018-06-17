@@ -17,8 +17,8 @@ static Timer timer;
 
 // creates a timer that has a duration of ms milliseconds
 // each duration_ms the function timer_fn will be called with arguments timer args
-Timer* Timer_create(uint16_t duration_ms, TimerFn timer_fn, void* timer_args){
-  memset(&timer, 0, sizeof(timer));
+struct Timer* Timer_create(uint16_t duration_ms, TimerFn timer_fn, void* timer_args){
+  //memset(&timer, 0, sizeof(timer));
   Timer* t=&timer;
   timer->duration_ms=duration_ms;
   timer->fn=timer_fn;
