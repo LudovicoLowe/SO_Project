@@ -69,26 +69,6 @@ struct UART* UART_init(const char* device __attribute__((unused)), uint32_t baud
   return &uart_0;
 }
 
-// number of chars available in rx buffer
-int UART_rxBufferAvailable(UART* uart) {
-  return uart->rx_size;
-}
-
-// number of chars available in rx buffer
-int UART_txBufferAvailable(UART* uart) {
-  return uart->tx_size;
-}
-
-// number of bytes left in rx buffer
-int UART_rxBufferLeft(UART* uart){
-  return BUFFER_SIZE - uart->rx_size;
-}
-
-// number of bytes left in tx buffer
-int UART_txBufferLeft(UART* uart){
-  return BUFFER_SIZE - uart->tx_size;
-}
-
 void UART_putChar(struct UART* uart, uint8_t c) {
   while (uart->tx_size>=BUFFER_SIZE);  //until there is some space in the buffer
   ATOMIC_BLOCK(ATOMIC_FORCEON){

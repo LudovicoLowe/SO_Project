@@ -14,15 +14,3 @@ void UART_putChar(struct UART* uart, uint8_t c);
 // returns a character from the uart.
 // if no character is available, the function waits
 uint8_t UART_getChar(struct UART* uart);
-
-// returns the number of characters to be read fron the rx buffer
-int UART_rxBufferAvailable(struct UART* uart);
-
-// returns the number of characters to be read fron the tx buffer
-int UART_txBufferAvailable(struct UART* uart);
-
-// returns the number of available characters in the rx buffer
-int UART_rxBufferLeft(struct UART* uart);
-
-// returns the number of available characters in the tx buffer
-int UART_txBufferLeft(struct UART* uart);
