@@ -15,7 +15,7 @@ struct Timer* timer;
 struct Request req;
 struct Answer ans;
 
-void send(void){
+void answer_send(void){
   char a[A_DIM];
   Packet_serialize(a, (void*)&ans)
   int dim=A_DIM;
@@ -70,7 +70,7 @@ int main (void) {
           memset(&ans, 0, A_DIM);
           ans->type=Ans;
           memcpy(&(ans->log), eeprom_buffer, sizeof(LOG))
-          send();
+          answer_send();
           _delay_ms(2000); //wait 2 sec
         }
       }

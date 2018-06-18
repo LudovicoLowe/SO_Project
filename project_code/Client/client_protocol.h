@@ -26,8 +26,8 @@ typedef struct {
 typedef struct {
   Type type;
   LOG log;
-} Answere;
-#define A_DIM=sizeof(Request);
+} Answer;
+#define A_DIM=sizeof(Answer);
 
 // converts a well formed packet into a string in dest
 void Packet_serialize(char* dest, const void* h);

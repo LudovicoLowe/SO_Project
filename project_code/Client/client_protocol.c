@@ -12,25 +12,25 @@ void Packet_serialize(char* dest, const void* h){
     }
     case Ans:
     {
-      memcpy(dest, h, sizeof(Answere));
+      memcpy(dest, h, sizeof(Answer));
     }
   }
 }
 
 //reads a packet from a preallocated buffer
- Type* Packet_deserialize(const char* buffer){
+Type* Packet_deserialize(const char* buffer){
   const Type* t=(Type*) buffer;
   switch(t->type) {
     case Req:
     {
-      Request* req=(Request*)malloc(sizeof(Request));
-      memcpy(req, buffer, sizeof(Request));
+      Request* req=(Request*)malloc(R_DIM);
+      memcpy(req, buffer, R_DIM);
       return (Type*)req;
     }
     case Ans:
     {
-      Answere* ans=(Answere*)malloc(sizeof(Answere));
-      memcpy(ans, buffer, sizeof(Answere));
+      Answer* ans=(Answer*)malloc(A_DIM);
+      memcpy(ans, buffer, A_DIM);
       return (Type*)ans;
     }
   }
