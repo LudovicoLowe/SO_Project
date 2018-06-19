@@ -17,7 +17,7 @@ struct Answer ans;
 
 void answer_send(void){
   char a[A_DIM];
-  Packet_serialize(a, (void*)&ans)
+  answer_serialize(a, &ans)
   int dim=A_DIM;
   int i;
   for(i=0; i<dim; ++i) UART_putChar(uart, (uint8_t) a[i]);
@@ -41,19 +41,18 @@ int main (void) {
   //initialization of the UART
   uart=UART_init(115200);
   //initialization of the timer with a duration time of 60000 ms (1 minute)
-  //read logs.. and put them in arargs
+  //read logs.. and put them in args
   timer=Timer_create(60000, timerFn, (void*) &args);
   Timer_start(timer);
   //
-  int i, n=(eeprom->size / sizeof(LOG);
+  int i, n;
   char eeprom_buffer[sizeof(LOG)];
-  char re[R_DIM];
+  char r_buffer[R_DIM];
 	while(1) {
     //read request from UART
-    memset(re, 0, R_DIM);  //clear the buffer where we read the Request to, each time
-    for (i=0; i<R_DIM; ++i) re[idx]=UART_getChar(uart);
-    memset(&req, 0, R_DIM);
-    Request_deserialize(re, &req);
+    memset(r_buffer, 0, R_DIM);  //clear the buffer where we read the Request to, each time
+    for (i=0; i<R_DIM; ++i) re_buffer[i]=UART_getChar(uart);
+    request_deserialize(r_buffer, &req);
     switch(req->req_type) {
       case SetTimer:
       {
@@ -63,6 +62,7 @@ int main (void) {
       }
       case LogRequest:
       {
+        n=(eeprom->size / sizeof(LOG);
         for(i=0; i<n); ++i) {
           //read logs from eeprom
           memset(eeprom_buffer, 0, sizeof(LOG));  //clear the buffer where we read the log to, each time
@@ -71,7 +71,7 @@ int main (void) {
           ans->type=Ans;
           memcpy(&(ans->log), eeprom_buffer, sizeof(LOG))
           answer_send();
-          _delay_ms(2000); //wait 2 sec
+          _delay_ms(1000); //wait 1 sec
         }
       }
     }

@@ -7,8 +7,8 @@ typedef struct LOG{
 } LOG;
 
 typedef enum {
-  Req=0x1,
-  Ans=0x2,
+  REQ=0x1,
+  ANS=0x2,
 } Type;
 
 typedef enum {

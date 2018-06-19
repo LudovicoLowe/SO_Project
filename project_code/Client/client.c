@@ -36,7 +36,6 @@ int main(int argc, char** argv){
   printf("Wellcome!\n");
   char command;
   char req_buffer[R_DIM];
-  char buf[128];
   while(1) {
     printf("Choose one of the following operations, by sending the corrispondent character:\n
             -[a] --> to Request the logs registrated by the Sensor Logger till now.\n
@@ -47,7 +46,7 @@ int main(int argc, char** argv){
       fprintf(stderr, "Error reading from stdin, exiting..\n");
       exit(EXIT_FAILURE);
     }
-    switch(buf) {
+    switch(command) {
       case 'a':
       {
         Request* req=(Request*)malloc(R_DIM);
@@ -96,7 +95,7 @@ int main(int argc, char** argv){
   return 0;
 }
 
-void request_send(int fd, char* buf) {
+void request_send(const int fd, const char* buf) {
   int ret, bytes_sent=0;
   while (bytes_sent<R_DIM) {
     ret=write(fd, buf+bytes_sent, 1);
@@ -127,8 +126,7 @@ void display_routine(int fd) {
       }
       bytes_read+=ret;
     }
-    Answer* a=(Answer*)malloc(A_DIM);
-    a=(Answer*)Packet_deserialize(buf);
+    Answer* a=(Answer*)Packet_deserialize(buf);
     printf("[From Sensor Logger]\n
             LOG: %d Temperature: %d Humidity: %d\n",
             a->log->n, a->log->temperature, a->log->humidity);

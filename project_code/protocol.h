@@ -7,8 +7,8 @@ typedef struct LOG{
 } LOG;
 
 typedef enum {
-  Req=0x1,
-  Ans=0x2,
+  REQ=0x1,
+  ANS=0x2,
 } Type;
 
 typedef enum {
@@ -30,7 +30,7 @@ typedef struct {
 #define A_DIM=sizeof(Answer);
 
 // converts a well formed packet into a string in dest
-void Packet_serialize(char* dest, const void* h);
+void Answer_serialize(char* dest, const struct Answer* a);
 
 // returns a newly allocated packet read from the buffer
 void Request_deserialize(const char* buffer, struct Request* r);

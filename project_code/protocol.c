@@ -3,21 +3,13 @@
 #include "protocol.h"
 
 // converts a packet into a (preallocated) buffer
-void Packet_serialize(char* dest, const void* h){
-  const Type* t=(Type*) h;
-  switch(t->type) {
-    case Req:
-    {
-      memcpy(dest, h, R_DIM);
-    }
-    case Ans:
-    {
-      memcpy(dest, h, A_DIM);
-    }
-  }
+void answer_serialize(char* dest, const struct Answer* a){
+  memset(dest, 0, sizeof(LOG));
+  memcpy(dest, h, A_DIM);
 }
 
 //reads a packet from a preallocated buffer
-void Request_deserialize(const char* buffer, struct Request* r){
+void request_deserialize(const char* buffer, struct Request* r){
+  memset(r, 0, R_DIM);
   memcpy(r, buffer, R_DIM);
 }

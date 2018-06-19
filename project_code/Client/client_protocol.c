@@ -6,11 +6,11 @@
 void Packet_serialize(char* dest, const void* h){
   const Type* t=(Type*) h;
   switch(t->type) {
-    case Req:
+    case REQ:
     {
       memcpy(dest, h, sizeof(Request));
     }
-    case Ans:
+    case ANS:
     {
       memcpy(dest, h, sizeof(Answer));
     }
@@ -21,13 +21,13 @@ void Packet_serialize(char* dest, const void* h){
 Type* Packet_deserialize(const char* buffer){
   const Type* t=(Type*) buffer;
   switch(t->type) {
-    case Req:
+    case REQ:
     {
       Request* req=(Request*)malloc(R_DIM);
       memcpy(req, buffer, R_DIM);
       return (Type*)req;
     }
-    case Ans:
+    case ANS:
     {
       Answer* ans=(Answer*)malloc(A_DIM);
       memcpy(ans, buffer, A_DIM);
