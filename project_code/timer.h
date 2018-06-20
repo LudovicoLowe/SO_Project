@@ -3,7 +3,7 @@
 
 struct Timer;
 
-typedef void (*TimerFn)(void*);
+typedef void (*TimerFn)(void);
 
 // creates a timer that has a duration of ms milliseconds
 // each duration_ms the function timer_fn will be called with arguments timer args

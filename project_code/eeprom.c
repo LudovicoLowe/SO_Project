@@ -9,25 +9,24 @@ typedef struct{
   volatile uint8_t b_size;
 } EEPROM_SPACE;
 
-static struct EEPROM_SPACE eeprom_s;
+static struct EEPROM_SPACE eeprom;
 
 struct EEPROM_SPACE* EEPROM_init(void){
   //memset(eeprom, 0, sizeof(EEPROM_SPACE));
-  struct EEPROM_SPACE* eeprom=&eeprom_s;
+  EEPROM_SPACE* eeprom_s=&eeprom;
 
-  eeprom->LOG_NUMBER=0;
-  eeprom->b_start=0;
-  eeprom->b_end=0;
-  eeprom->b_size=0;
+  eeprom_s->LOG_NUMBER=0;
+  eeprom_s->b_start=0;
+  eeprom_s->b_end=0;
+  eeprom_s->b_size=0;
 
-  return eeprom;
+  return eeprom_s;
 }
 
-void EEPROM_read(void* dest, struct EEPROM_SPACE* eeprom, uint16_t size){
-  uint8_t * d=(uint8_t*)dest;
-  uint16_t s=src;
-  uint16_t end=src+size;
-  while(s<end){
+void EEPROM_read(void* dest,  uint16_t size){
+  uint8_t* d=(uint8_t*)dest;
+  uint8_t end=d+(unit8_t)size;
+  while(d<end){
     eeprom_busy_wait();
     while(eeprom->b_size==0);  //untill there is nothing to read in the buffer
     ATOMIC_BLOCK(ATOMIC_FORCEON){
@@ -38,14 +37,14 @@ void EEPROM_read(void* dest, struct EEPROM_SPACE* eeprom, uint16_t size){
   }
 }
 
-void EEPROM_write(const void* src, struct EEPROM_SPACE* eeprom, uint16_t size){
-  const uint8_t * s=(uint8_t*)src;
-  const uint8_t * end=s+size;
+void EEPROM_write(const void* src, uint16_t size){
+  const uint8_t* s=(uint8_t*)src;
+  const uint8_t* end=s+(unit8_t)size;
   while(s<end){
     eeprom_busy_wait();
     while (eeprom->b_size>=BUFFER_SIZE);  //until there is some space in the buffer
     ATOMIC_BLOCK(ATOMIC_FORCEON){
-      eeprom_write_byte(eeprom->b_end, c);
+      eeprom_write_byte(eeprom->b_end, *s);
       BUFFER_PUT(eeprom->b, BUFFER_SIZE);
     }
     ++s;

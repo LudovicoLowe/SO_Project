@@ -5,6 +5,7 @@ typedef struct LOG{
   int temperature;
   int humidity;
 } LOG;
+#define LOG_DIM=sizeof(LOG)
 
 typedef enum {
   REQ=0x1,
@@ -21,13 +22,13 @@ typedef struct {
   ReqType req_type;
   int duration_s;
 } Request;
-#define R_DIM=sizeof(Request);
+#define R_DIM=sizeof(Request)
 
 typedef struct {
   Type type;
   LOG log;
 } Answer;
-#define A_DIM=sizeof(Answer);
+#define A_DIM=sizeof(Answer)
 
 // converts a well formed packet into a string in dest
 void Packet_serialize(char* dest, const void* h);

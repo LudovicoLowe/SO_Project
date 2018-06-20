@@ -4,7 +4,7 @@
 
 // converts a packet into a (preallocated) buffer
 void answer_serialize(char* dest, const struct Answer* a){
-  memset(dest, 0, sizeof(LOG));
+  memset(dest, 0, A_DIM);
   memcpy(dest, h, A_DIM);
 }
 
