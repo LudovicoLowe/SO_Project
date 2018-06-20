@@ -1,22 +1,39 @@
-CC = gcc
-CC_OPTS = -Wall -g --std=gnu99
-LIBS = -lpthread
+CC=avr-gcc
+CC_OPTS=-Wall --std=gnu99 -DF_CPU=16000000UL    -Ofast -funsigned-char -funsigned-bitfields  -fshort-enums -Wall -Wstrict-prototypes -mmcu=atmega328
 
-INCLUDES = serial_linux.h  client_protocol.h
+AVRDUDE=avrdude
 
-OBJS = client_protocol.o  serial_linux.o
+# com1 = serial port. Use lpt1 to connect to parallel port.
+AVRDUDE_PORT = /dev/ttyACM0    # programmer connected to serial device
+AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET):i
+AVRDUDE_FLAGS = -p m328 -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER) -b 115200
+AVRDUDE_FLAGS += $(AVRDUDE_NO_VERIFY)
+AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
+AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
+AVRDUDE_FLAGS += -D -q -V -C /usr/share/arduino/hardware/tools/avr/../avrdude.conf
+AVRDUDE_FLAGS += -c wiring
 
-BINS = client.bin
+INCLUDES=io.h  eeprom.h  pins.h timer.h  uart.h
+
+OBJS=uart.o timer.o pins.o eeprom.o io.o
+
+BINS= SensorLogger.elf
 
 .phony:	clean all
 
-all: $(BINS)
+all:	$(BINS)
 
+#common objects
 %.o:	%.c $(INCLUDES)
 	$(CC) $(CC_OPTS) -c  $<
 
-%.bin:  %.o $(OBJS) $(INCLUDES)
+%.elf:	%.o $(OBJS)
 	$(CC) $(CC_OPTS) -o $@ $< $(OBJS) $(LIBS)
 
 clean:
-	rm -rf $(OBJS) $(BINS) *~
+	rm -rf $(OBJS) $(BINS) *.hex *~ *.o
+
+%.hex:	%.elf
+	avr-objcopy -O ihex -R .eeprom $< $@
+	$(AVRDUDE) $(AVRDUDE_FLAGS) -U flash:w:$@:i $(AVRDUDE_WRITE_EEPROM)
+	rm $@
