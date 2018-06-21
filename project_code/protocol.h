@@ -1,34 +1,37 @@
 #pragma once
 
 typedef struct LOG{
-  int n;
-  int temperature;
-  int humidity;
+  unit8_t n;
+  unit8_t temperature;
+  unit8_t humidity;
 } LOG;
+#define LOG_DIM=sizeof(LOG)
 
 typedef enum {
-  Req=0x1,
-  Ans=0x2,
+  REQ=0x0,
+  ANS=0x1
 } Type;
 
 typedef enum {
-  SetTimer=0x3,
-  LogRequest=0x4,
+  SetTimer=0x0,
+  LogRequest=0x1
 } ReqType;
 
 typedef struct {
   Type type;
   ReqType req_type;
-  //timer set up
+  unit16_t duration_s;
 } Request;
+#define R_DIM=sizeof(Request)
 
 typedef struct {
   Type type;
   LOG log;
-} Answere;
+} Answer;
+#define A_DIM=sizeof(Answer)
 
 // converts a well formed packet into a string in dest
-void Packet_serialize(char* dest, const void* h);
+void Answer_serialize(char* dest, const struct Answer* a);
 
 // returns a newly allocated packet read from the buffer
 void Request_deserialize(const char* buffer, struct Request* r);

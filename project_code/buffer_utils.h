@@ -1,5 +1,7 @@
 #pragma once
 
+#define BUFFER_SIZE 256
+
 #define BUFFER_PUT(_IDX, _BSIZE_MAX)	\
   ++_IDX ## _end;					\
   if (_IDX ## _end>=_BSIZE_MAX)				\

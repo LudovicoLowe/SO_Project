@@ -1,104 +1,105 @@
 #include "pins.h"
+#include "digio.h"
 #include <avr/io.h>
 
 const Pin pins[] =
   {
     //0
     {
-      .in_register=&PINE,
-      .out_register=&PORTE,
-      .dir_register=&DDRE,
+      .in_register=&PIND,
+      .out_register=&PORTD,
+      .dir_register=&DDRD,
       .bit=0
     },
     //1
     {
-      .in_register=&PINE,
-      .out_register=&PORTE,
-      .dir_register=&DDRE,
+      .in_register=&PIND,
+      .out_register=&PORTD,
+      .dir_register=&DDRD,
       .bit=1
     },
     //2
     {
-      .in_register=&PINE,
-      .out_register=&PORTE,
-      .dir_register=&DDRE,
-      .bit=4
+      .in_register=&PIND,
+      .out_register=&PORTD,
+      .dir_register=&DDRD,
+      .bit=2
     },
     //3
     {
-      .in_register=&PINE,
-      .out_register=&PORTE,
-      .dir_register=&DDRE,
-      .bit=5
+      .in_register=&PIND,
+      .out_register=&PORTD,
+      .dir_register=&DDRD,
+      .bit=3
     },
     //4
     {
-      .in_register=&PING,
-      .out_register=&PORTG,
-      .dir_register=&DDRG,
-      .bit=5
+      .in_register=&PIND,
+      .out_register=&PORTD,
+      .dir_register=&DDRD,
+      .bit=4
     },
     //5
     {
-      .in_register=&PINE,
-      .out_register=&PORTE,
-      .dir_register=&DDRE,
-      .bit=3
+      .in_register=&PIND,
+      .out_register=&PORTD,
+      .dir_register=&DDRD,
+      .bit=5
     },
     //6
     {
-      .in_register=&PINH,
-      .out_register=&PORTH,
-      .dir_register=&DDRH,
-      .bit=3
+      .in_register=&PIND,
+      .out_register=&PORTD,
+      .dir_register=&DDRD,
+      .bit=6
     },
     //7
     {
-      .in_register=&PINH,
-      .out_register=&PORTH,
-      .dir_register=&DDRH,
-      .bit=4
+      .in_register=&PINB,
+      .out_register=&PORTB,
+      .dir_register=&DDRB,
+      .bit=7
     },
     //8
     {
-      .in_register=&PINH,
-      .out_register=&PORTH,
-      .dir_register=&DDRH,
-      .bit=5
+      .in_register=&PINB,
+      .out_register=&PORTB,
+      .dir_register=&DDRB,
+      .bit=0
     },
     //9
     {
-      .in_register=&PINH,
-      .out_register=&PORTH,
-      .dir_register=&DDRH,
-      .bit=6
+      .in_register=&PINB,
+      .out_register=&PORTB,
+      .dir_register=&DDRB,
+      .bit=1
     },
     //10
     {
       .in_register=&PINB,
       .out_register=&PORTB,
       .dir_register=&DDRB,
-      .bit=4
+      .bit=2
     },
     //11
     {
       .in_register=&PINB,
       .out_register=&PORTB,
       .dir_register=&DDRB,
-      .bit=5
+      .bit=3
     },
     //12
     {
       .in_register=&PINB,
       .out_register=&PORTB,
       .dir_register=&DDRB,
-      .bit=6
+      .bit=4
     },
     //13
     {
       .in_register=&PINB,
       .out_register=&PORTB,
       .dir_register=&DDRB,
-      .bit=7
+      .bit=5
     }
   };

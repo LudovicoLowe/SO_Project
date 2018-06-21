@@ -41,55 +41,41 @@ typedef struct {
   volatile uint8_t rx_size;
 
   int baud;
-  int uart_num; // hardware uart;
 } UART;
 
-static UART uart_0;
+static UART uart;
 
-struct UART* UART_init(const char* device __attribute__((unused)), uint32_t baud) {
-  UART* uart=&uart_0;
-  uart->uart_num=0;
+void UART_init(uint32_t baud) {
+  UART* u=&uart;
 
   switch(baud){
-  case 57600: setBaud57600(); break;
-  case 115200: setBaud115200(); break;
+  case 57600:
+    {
+      setBaud57600();
+      u->baud=57600;
+      break;
+  case 115200:
+    {
+      setBaud115200();
+      u->baud=115200;
+      break;
+    }
   default: return 0;
   }
 
-  uart->tx_start=0;
-  uart->tx_end=0;
-  uart->tx_size=0;
-  uart->rx_start=0;
-  uart->rx_end=0;
-  uart->rx_size=0;
+  u->tx_start=0;
+  u->tx_end=0;
+  u->tx_size=0;
+  u->rx_start=0;
+  u->rx_end=0;
+  u->rx_size=0;
 
   UCSR0C = _BV(UCSZ01) | _BV(UCSZ00); /* 8-bit data */
   UCSR0B = _BV(RXEN0) | _BV(TXEN0) | _BV(RXCIE0);   /* Enable RX and TX */
   sei();
-  return &uart_0;
 }
 
-// number of chars available in rx buffer
-int UART_rxBufferAvailable(UART* uart) {
-  return uart->rx_size;
-}
-
-// number of chars available in rx buffer
-int UART_txBufferAvailable(UART* uart) {
-  return uart->tx_size;
-}
-
-// number of bytes left in rx buffer
-int UART_rxBufferLeft(UART* uart){
-  return BUFFER_SIZE - uart->rx_size;
-}
-
-// number of bytes left in tx buffer
-int UART_txBufferLeft(UART* uart){
-  return BUFFER_SIZE - uart->tx_size;
-}
-
-void UART_putByte(struct UART* uart, uint8_t x) {
+void UART_putChar(uint8_t c) {
   while (uart->tx_size>=BUFFER_SIZE);  //until there is some space in the buffer
   ATOMIC_BLOCK(ATOMIC_FORCEON){
     uart->tx_buffer[uart->tx_end]=c;
@@ -98,30 +84,30 @@ void UART_putByte(struct UART* uart, uint8_t x) {
   UCSR0B |= _BV(UDRIE0); // enable transmit interrupt
 }
 
-uint8_t UART_getByte(struct UART* uart){
+uint8_t UART_getChar(void){
   while(uart->rx_size==0);  //untill there is nothing to read in the buffer
-  uint8_t x;
+  uint8_t c;
   ATOMIC_BLOCK(ATOMIC_FORCEON){
     c=uart->rx_buffer[uart->rx_start];
     BUFFER_GET(uart->rx, BUFFER_SIZE);
   }
-  return x;
+  return c;
 }
 
 
-ISR(USART0_RX_vect) {
-  uint8_t x=UDR0;
-  if (uart_0.rx_size<BUFFER_SIZE){
-    uart_0.rx_buffer[uart_0.rx_end] = x;
-    BUFFER_PUT(uart_0.rx, BUFFER_SIZE);
+ISR(USART_RX_vect) {
+  uint8_t c=UDR0;
+  if (uart.rx_size<BUFFER_SIZE){
+    uart.rx_buffer[uart.rx_end] = c;
+    BUFFER_PUT(uart.rx, BUFFER_SIZE);
   }
 }
 
-ISR(USART0_UDRE_vect){
-  if (! uart_0.tx_size){
+ISR(USART_UDRE_vect){
+  if (! uart.tx_size){
     UCSR0B &= ~_BV(UDRIE0);
   } else {
-    UDR0 = uart_0.tx_buffer[uart_0.tx_start];
-    BUFFER_GET(uart_0.tx, BUFFER_SIZE);
+    UDR0 = uart.tx_buffer[uart.tx_start];
+    BUFFER_GET(uart.tx, BUFFER_SIZE);
   }
 }

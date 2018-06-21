@@ -6,13 +6,31 @@
 #include "buffer_utils.h"
 #include "eeprom.h"
 #include "uart.h"
+#include "timer.h"
+#include "protocol.h"
 
 struct UART* uart;
 struct EEPROM_SPACE* eeprom;
+struct Timer* timer;
+struct Request req;
+struct Answer ans;
 
-void send(void* packet){
-  in dim=sizeof(packet);
-  for(int i=0; i<dim; ++i) UART_putByte(uart, (uint8_t)* packet);
+void answer_send(void){
+  char a[A_DIM];
+  answer_serialize(a, &ans)
+  int dim=A_DIM;
+  int i;
+  for(i=0; i<dim; ++i) UART_putChar(uart, (uint8_t) a[i]);
+}
+
+void timerFn(void* args){
+  struct LOG* log;
+  log->n=eeprom->LOG_NUMBER;
+  log->temperature= *(args->temperature);
+  log->humidity= *(args->humidity);
+  ++(eeprom->LOG_NUMBER);
+  //write logs in eeprom
+  EEPROM_write(&log, sizeof(LOG));
 }
 
 int main (void) {
@@ -21,56 +39,42 @@ int main (void) {
   //initalization of the eeprom
   eeprom=EEPROM_init();
   //initialization of the UART
-  uart=UART_init("uart_0",115200);
-
+  uart=UART_init(115200);
+  //initialization of the timer with a duration time of 60000 ms (1 minute)
+  //read logs.. and put them in args
+  timer=Timer_create(60000, timerFn, (void*) &args);
+  Timer_start(timer);
   //
-  uint8_t termo_pin=6;
-  uint8_t start_pin=0;
-  //
-  char* log_data="fa 18° a giugno porco il dio";
-  int size=strlen(log_data)+1;  //!
-  char eeprom_buffer[size];
-  //
-  char tx_message[BUFFER_SIZE];
-  char rx_message[BUFFER_SIZE];
-
+  int i, n;
+  char eeprom_buffer[sizeof(LOG)];
+  char r_buffer[R_DIM];
 	while(1) {
-    //
-    if (0) {
-      //write logs in eeprom
-      EEPROM_write(eeprom, log_data, size);
-      _delay_ms(1000); //wait 1 sec
-
-      //read logs in eeprom
-      memset(eeprom_buffer, 0, size);  //clear the buffer where we read the message to, each time
-      EEPROM_read(eeprom_buffer, eeprom, size);
-      eeprom_buffer[size-1]=0;  //!
-      _delay_ms(1000); //wait 1 sec
-    }
-    //
-    if (0) {
-      //copy log buffer into transfer buffer
-      sprintf(tx_message, "msg: [%s]\n", eeprom_buffer);
-      //send
-      in dim=sizeof(tx_message);
-      for(int i=0; i<dim; ++i) UART_putByte(uart, (uint8_t)* packet);
-      _delay_ms(1000); //wait 1 sec
-
-      //read request packet
-      uint8_t x;
-      int idx=0;
-      while (1) {
-        x= UART_getByte(uart);
-        rx_message[idx]=c;
-        ++idx;
-        if (c=='\n' || c=='\r' || c==0) {
-          rx_message[idx]=0;
-          break;
+    //read request from UART
+    memset(r_buffer, 0, R_DIM);  //clear the buffer where we read the Request to, each time
+    for (i=0; i<R_DIM; ++i) re_buffer[i]=UART_getChar(uart);
+    request_deserialize(r_buffer, &req);
+    switch(req->req_type) {
+      case SetTimer:
+      {
+        Timer_destroy(timer);
+        timer=Timer_create((unit16_t)(req->duration_s * 1000), timerFn, (void*) &args);
+        Timer_start(timer);
+      }
+      case LogRequest:
+      {
+        n=(eeprom->size / sizeof(LOG);
+        for(i=0; i<n); ++i) {
+          //read logs from eeprom
+          memset(eeprom_buffer, 0, sizeof(LOG));  //clear the buffer where we read the log to, each time
+          EEPROM_read(eeprom_buffer, sizeof(LOG));
+          memset(&ans, 0, A_DIM);
+          ans->type=Ans;
+          memcpy(&(ans->log), eeprom_buffer, sizeof(LOG))
+          answer_send();
+          _delay_ms(1000); //wait 1 sec
         }
       }
-      _delay_ms(1000); //wait 1 sec
     }
-    //....
-    _delay_ms(1000); //wait 1 sec
+    _delay_ms(5000); //wait 5 sec
 	}
 }
