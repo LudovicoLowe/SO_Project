@@ -95,7 +95,7 @@ uint8_t UART_getChar(void){
 }
 
 
-ISR(USART0_RX_vect) {
+ISR(USART_RX_vect) {
   uint8_t c=UDR0;
   if (uart.rx_size<BUFFER_SIZE){
     uart.rx_buffer[uart.rx_end] = c;
@@ -103,7 +103,7 @@ ISR(USART0_RX_vect) {
   }
 }
 
-ISR(USART0_UDRE_vect){
+ISR(USART_UDRE_vect){
   if (! uart.tx_size){
     UCSR0B &= ~_BV(UDRIE0);
   } else {
