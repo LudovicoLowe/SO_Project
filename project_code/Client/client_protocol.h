@@ -5,33 +5,27 @@ typedef struct LOG{
   int temperature;
   int humidity;
 } LOG;
-#define LOG_DIM=sizeof(LOG)
 
 typedef enum {
-  REQ=0x1,
-  ANS=0x2,
+  SetTimer=0x0,
+  LogRequest=0x1
 } Type;
 
-typedef enum {
-  SetTimer=0x3,
-  LogRequest=0x4,
-} ReqType;
-
 typedef struct {
   Type type;
-  ReqType req_type;
   int duration_s;
 } Request;
-#define R_DIM=sizeof(Request)
 
 typedef struct {
-  Type type;
-  LOG log;
+  LOG l;
 } Answer;
-#define A_DIM=sizeof(Answer)
+
+#define LOG_DIM sizeof(LOG)
+#define R_DIM sizeof(Request)
+#define A_DIM sizeof(Answer)
 
 // converts a well formed packet into a string in dest
-void Packet_serialize(char* dest, const void* h);
+void request_serialize(char* dest, const Request* r);
 
 // returns a newly allocated packet read from the buffer
-Type* Packet_deserialize(const char* buffer);
+Answer* answer_deserialize(const char* buffer);
