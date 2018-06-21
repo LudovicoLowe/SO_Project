@@ -53,5 +53,5 @@ void Timer_stop(){
 
 ISR(TIMER1_COMPA_vect) {
   TCNT1 = 0;
-  (*timer.fn)();
+  while ((*timer.fn)() == 0);
 }
