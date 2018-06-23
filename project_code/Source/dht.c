@@ -1,52 +1,29 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "dht.h"
-#include "pins.h"
+#include <util/delay.h>
+#include <string.h>
+#include "packet_utils.h"
 #include "io.h"
+#include "dht.h"
 
-typedef enum DHT_ERROR_t{
-  DHT_OK=0x0,
-  DHT_TIMEOUT=0x1,
-  DHT_CHECKSUM_ERROR=0x2
-} DHT_ERROR_t;
-
-static uint8_t DHT_PIN;
-
-void DHT_setup(uint8_t pin) {
-  DHT_PIN=pin;
-}
+volatile unsigned long t0_ovflw_cnt = 0;
 
 unsigned long micros() {
-	unsigned long m;
-	uint8_t oldSREG = SREG, t;
+    unsigned long m;
+	uint8_t temp = SREG, t;
 
 	cli();
-	m = timer0_overflow_count;
-#if defined(TCNT0)
+    m=t0_ovflw_cnt;
 	t = TCNT0;
-#elif defined(TCNT0L)
-	t = TCNT0L;
-#else
-	#error TIMER 0 not defined
-#endif
 
+	if ((TIFR0 & _BV(TOV0)) && (t < 255)) ++m;
 
-#ifdef TIFR0
-	if ((TIFR0 & _BV(TOV0)) && (t & 255))
-		m++;
-#else
-	if ((TIFR & _BV(TOV0)) && (t & 255))
-		m++;
-#endif
-
-	SREG = oldSREG;
+	SREG = temp;
 
 	return ((m << 8) + t) * (64 / CCxMS);
 }
 
-void* DHT_readSensor(struct LOG* l) {
-    DHT_ERROR_t error;
-
+int DHT_readSensor(struct LOG* l, uint8_t pin) {
 	uint8_t buf[5];  // buffer to recieve
 	uint8_t bit = 7;  // byte = 8 bit
 	uint8_t idx = 0;
@@ -55,27 +32,27 @@ void* DHT_readSensor(struct LOG* l) {
   memset(buf, 0, sizeof(buf));
 
 	//request
-  DigIO_setDirection(DHT_PIN, 1);
-  DigIO_setValue(DHT_PIN, 0);
+  DigIO_setDirection(pin, 1);
+  DigIO_setValue(pin, 0);
 	_delay_ms(18);
-	DigIO_setValue(DHT_PIN, 1);
+	DigIO_setValue(pin, 1);
 	_delay_ms(40);
-	DigIO_setDirection(DHT_PIN, 0);
+	DigIO_setDirection(pin, 0);
 
 	//acknowledge or timeout
 	unsigned int cnt = 10000;
-	while(DigIO_getValue(DHT_PIN) == 0) {if (--cnt == 0) {error=DHT_TIMEOUT; return (void*)&error;}}
+	while(DigIO_getValue(pin) == 0) if (--cnt == 0) return 0;
 	cnt = 10000;
-	while(DigIO_getValue(DHT_PIN) == 1) {if (--cnt == 0) {error=DHT_TIMEOUT; return (void*)&error;}}
+	while(DigIO_getValue(pin) == 1) if (--cnt == 0) return 0;
 
 	//read output or timeout
   unsigned long t;
 	for (int i=0; i<40; ++i) {  //data = 5 bytes = 40 bytes
-		loopCnt = 10000;
-		while(DigIO_getValue(DHT_PIN) == 0) {if (--cnt == 0) {error=DHT_TIMEOUT; return (void*)&error;}}
+		cnt = 10000;
+		while(DigIO_getValue(pin) == 0) if (--cnt == 0) return 0;
 		t=micros();  //register moment when sensor writing signal starts
-		loopCnt = 10000;
-		while(DigIO_getValue(DHT_PIN) == 1) {if (--cnt == 0) {error=DHT_TIMEOUT; return (void*)&error;}}
+		cnt = 10000;
+		while(DigIO_getValue(pin) == 1) if (--cnt == 0) return 0;
 
     //[dht11 sensor writing signal lasts 40 ms]
     //--> if it passed at least 40 ms, it means bit is to be pull up
@@ -93,8 +70,11 @@ void* DHT_readSensor(struct LOG* l) {
 	l->temperature=buf[2];
 
   //checksum control
-	if (buf[4] != (buf[0] + buf[2])) {error=DHT_CHECKSUM_ERROR; return (void*)&error;}
+	if (buf[4] != (buf[0] + buf[2])) if (--cnt == 0) return 0;
 
-    error=DHT_OK;
-	return (void*)&error;
+	return 1;
+}
+
+ISR (TIMER0_OVF_vect) {
+	++t0_ovflw_cnt;
 }

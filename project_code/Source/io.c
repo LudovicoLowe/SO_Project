@@ -1,6 +1,6 @@
 #include <avr/io.h>
 #include <avr/pgmspace.h>
-#include "digio.h"
+#include "io.h"
 #include "pins.h"
 
 void DigIO_setDirection(uint8_t pin, PinDirection dir) {

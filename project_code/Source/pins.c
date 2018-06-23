@@ -1,6 +1,5 @@
-#include "pins.h"
-#include "digio.h"
 #include <avr/io.h>
+#include "pins.h"
 
 const Pin pins[] =
   {
