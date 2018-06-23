@@ -2,17 +2,9 @@
 #include "buffer_utils.h"
 #include "avr/eeprom.h"
 
-typedef struct{
-  volatile unit8_t LOG_NUMBER;
-  volatile uint8_t b_start;
-  volatile uint8_t b_end;
-  volatile uint8_t b_size;
-} EEPROM_SPACE;
-
-static struct EEPROM_SPACE eeprom;
+static EEPROM_SPACE eeprom;
 
 struct EEPROM_SPACE* EEPROM_init(void){
-  //memset(eeprom, 0, sizeof(EEPROM_SPACE));
   EEPROM_SPACE* eeprom_s=&eeprom;
 
   eeprom_s->LOG_NUMBER=0;
@@ -23,12 +15,12 @@ struct EEPROM_SPACE* EEPROM_init(void){
   return eeprom_s;
 }
 
-void EEPROM_read(void* dest,  uint16_t size){
+void EEPROM_read(void* dest, uint16_t size){
   uint8_t* d=(uint8_t*)dest;
-  uint8_t end=d+(unit8_t)size;
+  uint8_t end=d+(uint8_t)size;
   while(d<end){
     eeprom_busy_wait();
-    while(eeprom->b_size==0);  //untill there is nothing to read in the buffer
+    while (eeprom->b_size==0);  //untill there is nothing to read in the buffer
     ATOMIC_BLOCK(ATOMIC_FORCEON){
       *d=eeprom_read_byte(eeprom->b_start);
       BUFFER_GET(eeprom->b, BUFFER_SIZE);
@@ -38,8 +30,8 @@ void EEPROM_read(void* dest,  uint16_t size){
 }
 
 void EEPROM_write(const void* src, uint16_t size){
-  const uint8_t* s=(uint8_t*)src;
-  const uint8_t* end=s+(unit8_t)size;
+  uint8_t* s=(uint8_t*)src;
+  uint8_t* end=s+(uint8_t)size;
   while(s<end){
     eeprom_busy_wait();
     while (eeprom->b_size>=BUFFER_SIZE);  //until there is some space in the buffer

@@ -6,12 +6,6 @@
 // here we hook to timer 5 which is not used in any of the primary arduino pins
 // its 16 bit and allows us a decent resolution
 
-
-typedef struct{
-  uint16_t duration_ms;
-  TimerFn fn;
-} Timer;
-
 static Timer timer;
 
 // creates a timer that has a duration of ms milliseconds
@@ -53,5 +47,5 @@ void Timer_stop(){
 
 ISR(TIMER1_COMPA_vect) {
   TCNT1 = 0;
-  while ((*timer.fn)() == 0);
+  while ((*timer.fn)() == 0);;
 }

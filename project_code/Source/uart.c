@@ -29,20 +29,6 @@ void setBaud115200(void) {
 #undef BAUD
 }
 
-typedef struct {
-  int tx_buffer[BUFFER_SIZE];
-  volatile uint8_t tx_start;
-  volatile uint8_t tx_end;
-  volatile uint8_t tx_size;
-
-  int rx_buffer[BUFFER_SIZE];
-  volatile uint8_t rx_start;
-  volatile uint8_t rx_end;
-  volatile uint8_t rx_size;
-
-  int baud;
-} UART;
-
 static UART uart;
 
 void UART_init(uint32_t baud) {
