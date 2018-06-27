@@ -1,8 +1,9 @@
 #pragma once
 #include <stdint.h>
+#include <util/delay.h>
 
-//#define CCxMS ( F_CPU / 1000000L )
-#define CCxMS 16
+#define CCxMS ( F_CPU / 1000000L )
+//#define CCxMS 16
 
 //returns the milliseconds since device started
 unsigned long micros(void);

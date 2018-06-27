@@ -16,16 +16,11 @@ typedef struct {
   int duration_s;
 } Request;
 
-typedef struct {
-  LOG l;
-} Answer;
-
 #define LOG_DIM sizeof(LOG)
 #define R_DIM sizeof(Request)
-#define A_DIM sizeof(Answer)
 
 // converts a well formed packet into a string in dest
 void request_serialize(char* dest, const Request* r);
 
 // returns a newly allocated packet read from the buffer
-Answer* answer_deserialize(const char* buffer);
+LOG* answer_deserialize(const char* buffer);

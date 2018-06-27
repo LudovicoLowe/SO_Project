@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-typedef int (*TimerFn)(void*);
+typedef void (*TimerFn)(void*);
 
 struct Timer;
 

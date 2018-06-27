@@ -9,9 +9,9 @@ void request_serialize(char* dest, const Request* r){
 }
 
 //reads a packet from a preallocated buffer
-Answer* answer_deserialize(const char* buffer){
-    Answer* ans=(Answer*)malloc(A_DIM);
-    memset(ans, 0, A_DIM);
-    memcpy(ans, buffer, A_DIM);
+LOG* answer_deserialize(const char* buffer){
+    LOG* ans=(LOG*)malloc(LOG_DIM);
+    memset(ans, 0, LOG_DIM);
+    memcpy(ans, buffer, LOG_DIM);
     return ans;
 }
