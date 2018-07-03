@@ -8,7 +8,7 @@ typedef struct LOG{
 
 typedef enum Type{
   SetTimer = 0x0,
-  LogRequest = 0x1
+  LogRequest = 0x1,
 } Type;
 
 typedef struct Request{

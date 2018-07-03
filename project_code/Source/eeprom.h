@@ -1,5 +1,8 @@
 #pragma once
 #include <stdint.h>
+#include "packet_utils.h"
+
+#define EEPROM_DIM (30 * LOG_DIM)
 
 typedef struct EEPROM_SPACE{
   uint8_t LOG_NUMBER;
@@ -12,7 +15,7 @@ typedef struct EEPROM_SPACE{
 struct EEPROM_SPACE* EEPROM_init(void);
 
 // reads in dest size bytes from eeprom ring buffer
-void EEPROM_read(void* dest, uint16_t size, struct EEPROM_SPACE* eeprom);
+int EEPROM_read(void* dest, uint16_t size, struct EEPROM_SPACE* eeprom);
 
 // writes in eeprom ring buffer size bytes from src
-void EEPROM_write(const void* src,  uint16_t size, struct EEPROM_SPACE* eeprom);
+int EEPROM_write(const void* src,  uint16_t size, struct EEPROM_SPACE* eeprom);

@@ -1,8 +1,7 @@
 #pragma once
 #include <stdint.h>
-#include <util/delay.h>
 
-#define CCxMS ( F_CPU / 1000000L )
+#define CCxMS ( F_CPU / 1000000UL )
 //#define CCxMS 16
 
 //returns the milliseconds since device started

@@ -6,12 +6,12 @@ AVRDUDE=avrdude
 # com1 = serial port. Use lpt1 to connect to parallel port.
 AVRDUDE_PORT = /dev/ttyACM0    # programmer connected to serial device
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET):i
-AVRDUDE_FLAGS = -p m328 -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER) -b 115200
+AVRDUDE_FLAGS = -p m328p -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER) -b 115200
 AVRDUDE_FLAGS += $(AVRDUDE_NO_VERIFY)
 AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
 AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
 AVRDUDE_FLAGS += -D -q -V -C /usr/share/arduino/hardware/tools/avr/../avrdude.conf
-AVRDUDE_FLAGS += -c wiring
+AVRDUDE_FLAGS += -c arduino
 
 INCLUDES = io.h eeprom.h pins.h timer.h uart.h dht.h
 
