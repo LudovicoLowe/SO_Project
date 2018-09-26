@@ -5,7 +5,8 @@
 #include <pthread.h>
 #include <errno.h>
 #include "serial_linux.h"
-#include "client_protocol.h"
+
+#define BUFFER_SIZE 256
 
 typedef struct {
     int fd;
@@ -23,31 +24,38 @@ void* display_routine(void* arg) {
     bytes_read=0;
     while (*run) {
       ret=read(fd, buf+bytes_read, 1);
-      //if (ret == -1 && errno == EAGAIN) continue;
+      if (ret == -1 && errno == EAGAIN) continue;
       if (ret<0) {
         fprintf(stderr, "Error reading on descriptor: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
       }
-      if (*(buf+bytes_read) == '\n') break;
+      if (*(buf+bytes_read) == '\n' || *(buf+bytes_read) == '\0') break;
       ++bytes_read;
     }
-    printf("\n[From Sensor Logger]\n%s\n\n", buf);
+    *(buf+bytes_read)='\0';
+    if (*run && *buf!='\0') printf("\n[From Sensor Logger]\n%s\n\n", buf);
+    sleep(5);
   }
   printf("\n[Display Routine exiting..]\n\n");
   free(buf);
   pthread_exit(NULL);
 }
 
-int main(int argc, char** argv){
-  /*
-  char device[128];
-  memset(device, 0, sizeof(device));
-  printf("Please enter the name of the divice: [default: 'ttyACM0']");
-  if (fgets(device, sizeof(device), stdin) != (char*)device) {
-    fprintf(stderr, "Error reading from stdin, exiting..\n");
-    exit(EXIT_FAILURE);
+void mesg_send(void* arg, char* buf) {
+  int ret, fd=((ARG_T*)arg)->fd, dim=sizeof(buf);
+  uint16_t wrote_bytes=0;
+  while (wrote_bytes<dim) {
+    ret=write(fd, buf+wrote_bytes, 1);
+    if (ret == -1 && errno == EINTR) continue;
+    if (ret<0) {
+      fprintf(stderr, "Error writing on descriptor: %s\n", strerror(errno));
+      exit(EXIT_FAILURE);
+    }
+    ++wrote_bytes;
   }
-  */
+}
+
+int main(int argc, char** argv){
   //serial port initialization
   int fd=serial_open("/dev/ttyACM0");
   if (fd<0) {
@@ -58,13 +66,11 @@ int main(int argc, char** argv){
     fprintf(stderr, "Failed setting serial port attributes: %s\n", strerror(errno));
     exit(EXIT_FAILURE);
   }
-  serial_set_blocking(fd, 1);  //set serial port to be blocking
+  serial_set_blocking(fd, 0);  //set serial port to be non blocking
   if (!fd) {
     fprintf(stderr, "Failed setting the attributes of the serial port!\n");
     exit(EXIT_FAILURE);
   }
-  //initializzation tf the comunication protocol..
-  struct PacketHandler* h=PacketHandler_init();
   //display routine thread launch..
   ARG_T* arg=(ARG_T*)malloc(sizeof(ARG_T));
   arg->fd=fd;
@@ -76,94 +82,36 @@ int main(int argc, char** argv){
   }
   //
   printf("Wellcome!\n");
-  /*
-  char pin[2];
-  uint8_t  pin_number;
+  char msg[BUFFER_SIZE];
   while(1) {
-    printf("Please choose the digital pin number where the sensor is connected: [1 - 14] [0 to skip]\n");
-    scanf("%s", pin);
-    pin_number=(uint8_t)atoi(pin);
-    if (pin_number<0 || pin_number>14) {
-      printf("Inserted value out of range, or not a number!\n  \
-              Please retry..\n");
-      continue;
-    }
-    else {
-	  if (pin_number!=0) {
-      --pin_number;
-      //send pin number to the microcontroller
-	  int ret=write(fd, &pin_number, sizeof(uint8_t));
-	  if (ret<0) {
-		fprintf(stderr, "Error writing on descriptor: %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	  }
-	  }
-      break;
-    }
-  }
-  */
-  //
-  char command;
-  char seconds[128];
-  while(1) {
-    printf("Choose one of the following operations, by entering the corrispondent character:\n \
-    -[a] --> to Request the logs registrated by the Sensor Logger till now.\n \
-    -[b] --> to Set the period after which the Sensor Logger shall register a log.\n \
-    -[q] --> to Quit.\n");
+    memset(msg, 0, BUFFER_SIZE);
+    printf("Choose one of the following operations, by entering the corrispondent character:\n");
+    printf("  -[a] --> to Request the logs registrated by the Sensor Logger till now.\n");
+    printf("  -[b] --> to Set the period after which the Sensor Logger shall register a log.\n");
+    printf("  -[q] --> to Quit.\n");
     //Read a line from stdin
     //memset(&command, 0, sizeof(char));  //clear buffer each time
-    scanf("%s", &command);
-    /*
-    if (fgets(command, sizeof(command), stdin) != (char*)command) {
-      fprintf(stderr, "Error reading from stdin, exiting..\n");
-      exit(EXIT_FAILURE);
-    }
-    */
-    if (command=='a') {
-		    Request* req=(Request*)malloc(R_DIM);
-        req->type=LogRequest;
-        req->duration_s=0;
-        //
-        while(LoadPacket(h, req));
-        FlushBuffer(fd, h);
-        //
-        printf("Log Request sent!\n\n");
-        free(req);
-    }
-	  else if (command=='b') {
-	    while(1) {
-        memset(seconds, 0, sizeof(seconds));  //clear buffer each time
-        printf("Insert the new period (seconds): [at least 10]");
-        scanf("%s", seconds);
-        /*
-        if (fgets(seconds, sizeof(seconds), stdin) != (char*)seconds) {
-				fprintf(stderr, "Error reading from stdin, exiting..\n");
-				exit(EXIT_FAILURE);
-			  */
-        int x=atoi(seconds);
-        if (x==0 || x<10) {
-          printf("Inserted value is not a number! (or is 0.. or less then 10..)\n  \
-					Please retry..\n");
-          continue;
-        }
-        break;
-      }
-      Request* req=(Request*)malloc(R_DIM);
-      req->type=SetTimer;
-      req->duration_s=(uint16_t)atoi(seconds);
-      //
-      while(LoadPacket(h, req));
-      FlushBuffer(fd, h);
-      //
-      printf("Timer Reset sent!\n\n");
-      free(req);
-    }
-    else if (command=='q') {
+    scanf("%s", msg);
+    mesg_send((void*)arg, msg);
+    if (msg[0]=='q') {
       printf("Exiting..\n");
       arg->running=0;
       break;
     }
-    else printf("Command not recognised! Please try again..\n");
+    else if (msg[0]=='b') {
+      while(1) {
+        memset(msg, 0, BUFFER_SIZE);
+        printf("Choose the new period of the Timer:\n");
+        printf("  -[a] --> 30 secons\n");
+        printf("  -[b] --> 1 minute\n");
+        printf("  -[c] --> 2 minute\n");
+        scanf("%s", msg);
+        if (msg[0]=='a' || msg[0]=='b' || msg[0]=='c') break;
+        else printf("Input does not match! Please try again..\n");
+      }
+      mesg_send((void*)arg, msg);
+    }
+    else if (msg[0]!='a') printf("Command not recognised! Please try again..\n");
     sleep(5);  //wait 5 seconds before asking again for command
   }
   //join on the display routine thread

@@ -1,5 +1,5 @@
 CC = avr-gcc
-CC_OPTS = -Wall --std=gnu99 -DF_CPU=16000000UL    -Ofast -funsigned-char -funsigned-bitfields  -fshort-enums -Wall -Wstrict-prototypes -mmcu=atmega328
+CC_OPTS = -Wall --std=gnu99    -Ofast -funsigned-char -funsigned-bitfields  -fshort-enums -Wall -Wstrict-prototypes -mmcu=atmega328
 
 AVRDUDE=avrdude
 
@@ -13,9 +13,9 @@ AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
 AVRDUDE_FLAGS += -D -q -V -C /usr/share/arduino/hardware/tools/avr/../avrdude.conf
 AVRDUDE_FLAGS += -c arduino
 
-INCLUDES = io.h eeprom.h pins.h timer.h uart.h dht.h
+INCLUDES = io.h pins.h timer.h uart.h dht.h
 
-OBJS = dht.o uart.o timer.o pins.o eeprom.o io.o
+OBJS = dht.o uart.o timer.o pins.o io.o
 
 BINS = SensorLogger.elf
 

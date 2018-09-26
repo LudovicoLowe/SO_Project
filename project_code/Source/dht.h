@@ -1,11 +1,10 @@
 #pragma once
+#include "utils.h"
 #include <stdint.h>
 
-#define CCxMS ( F_CPU / 1000000UL )
-//#define CCxMS 16
+int confirm(int pin, int us, int level);
 
-//returns the milliseconds since device started
-unsigned long micros(void);
+uint8_t bits2byte(int* data);
 
 //reads humidity and temperature values read from the sensor into a log
-int DHT_readSensor(struct LOG* l, uint8_t pin);
+int DHT_readSensor(int* data, uint8_t pin);

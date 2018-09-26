@@ -2,7 +2,6 @@
 #include <avr/interrupt.h>
 #include <util/atomic.h>
 #include <string.h>
-#include "buffer_utils.h"
 #include "uart.h"
 
 void setBaud57600(void) {
@@ -86,6 +85,15 @@ void UART_putChar(uint8_t c, struct UART* u) {
   UCSR0B |= _BV(UDRIE0); // enable transmit interrupt
 }
 
+ISR (USART_UDRE_vect) {
+  if (! uart.tx_size){
+    UCSR0B &= ~_BV(UDRIE0);
+  } else {
+    UDR0 = uart.tx_buffer[uart.tx_start];
+    BUFFER_GET(uart.tx, BUFFER_SIZE);
+  }
+}
+
 uint8_t UART_getChar(struct UART* u){
   while(u->rx_size==0);  //untill there is nothing to read in the buffer
   uint8_t c;
@@ -102,14 +110,5 @@ ISR (USART_RX_vect) {
   if (uart.rx_size<BUFFER_SIZE){
     uart.rx_buffer[uart.rx_end] = c;
     BUFFER_PUT(uart.rx, BUFFER_SIZE);
-  }
-}
-
-ISR (USART_UDRE_vect) {
-  if (! uart.tx_size){
-    UCSR0B &= ~_BV(UDRIE0);
-  } else {
-    UDR0 = uart.tx_buffer[uart.tx_start];
-    BUFFER_GET(uart.tx, BUFFER_SIZE);
   }
 }

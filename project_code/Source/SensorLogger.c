@@ -1,118 +1,131 @@
+#include "utils.h"
 #include <avr/io.h>
-#include <util/delay.h>
+#include <stdio.h>
 #include <string.h>
 #include <stdint.h>
-#include <stdio.h>
-#include "buffer_utils.h"
-#include "packet_utils.h"
 #include "io.h"
-#include "eeprom.h"
 #include "uart.h"
 #include "timer.h"
 #include "dht.h"
 
-typedef struct timer_args{
-    struct EEPROM_SPACE* eeprom;
-    uint8_t N_LOG;  //progressive identificative number of logs
-    uint8_t pin;
-} timer_args;
+struct UART* uart;
 
-static struct timer_args arg;
-
-void answer_send(char* msg, struct UART* uart){
+void answer_send(char* msg){
   int len = strlen(msg);
 	for(int i=0; i<len; ++i, ++msg) UART_putChar((uint8_t)*msg, uart);
-  _delay_ms(1000); //wait 1 sec
 }
 
+int N_LOG;
+uint8_t DHT_PIN=8;
+uint16_t timer_duration;
+
 void timerFn(void* args){
-  timer_args* a=(timer_args*)args;
-  LOG l;
-  (&l)->n = a->N_LOG;
-  while(DHT_readSensor(&l, a->pin));
-  //write logs in eeprom
-  uint8_t buf[LOG_DIM];
-  memset(buf, 0, LOG_DIM);  //clear buffer
-  memcpy((void*)buf, (void*)&l, LOG_DIM);  //serialize
-  if (EEPROM_write((void*)buf, LOG_DIM, a->eeprom)) {
-    ++a->eeprom->LOG_NUMBER;
-  /*
-  char mesg[BUFFER_SIZE];
-  memset(mesg, 0, BUFFER_SIZE);
-  sprintf(mesg, "MSG: Timer proc.. registrating log %d!\n", a->N_LOG);
-  answer_send(mesg, a->uart);
-  */
-    ++a->N_LOG;
+  //answer_send("MSG: TIMER PROC!\n");
+  uint16_t* argint=(uint16_t*)args;
+  *argint=(*argint)+1;
+  uint16_t tick=*argint;
+
+  if (tick >= timer_duration) {
+    answer_send("MSG: TIMER PROC!\n");
+
+    int buf[40];
+    //memset(buf, 0, 40);
+    DHT_readSensor(buf, DHT_PIN);
+
+    uint8_t h = bits2byte(buf);
+    uint8_t t = bits2byte(buf + 16);
+
+
+    //send log
+    char mesg[BUFFER_SIZE];
+    //memset(mesg, 0, BUFFER_SIZE);
+    sprintf(mesg, "LOG: %d Temperature: %d Humidity: %d\n", N_LOG, t, h);
+    answer_send(mesg);
+    ++N_LOG;
+
+    *argint=0;
   }
 }
 
-int main (void){
+int main(void){
   //initialization of the UART
-  struct UART* uart=UART_init(115200);
-  answer_send("MSG: UART initialized!\n", uart);
-  //initalization of the eeprom
-  struct EEPROM_SPACE* eeprom=EEPROM_init();
-  answer_send("MSG: EEPROM space initialized!\n", uart);
-  //initialization of DHT
-  //uint8_t DHT_PIN=UART_getChar(uart); //get the dht pin number from client
+  uart=UART_init(115200);
+  answer_send("MSG: UART initialized!\n");
 
-  uint8_t DHT_PIN=8;
-  struct timer_args* ar=&arg;
-  ar->eeprom=eeprom;
-  ar->pin=DHT_PIN;
-  ar->N_LOG=0;
-  answer_send("MSG: Going to register an initial log into the EEPROM..\n", uart);
-  timerFn((void*)ar);  //register an initial log
-  answer_send("MSG: Done. LOG 0 registrated..\n", uart);
-
-  //initialization of the timer with a duration time of 60000 ms (1 minute)
-  struct Timer* timer=Timer_create(60000, timerFn, (void*)ar);
+  //initialization of the timer;
+  volatile uint16_t tick=0;
+  timer_duration=30;
+  N_LOG=0;
+  struct Timer* timer=Timer_create(timerFn, (void*) &tick);
   Timer_start(timer);
-  answer_send("MSG: Timer started with a period of 1 min..\n", uart);
+  answer_send("MSG: Timer started with an initial period of 30 second..\n");
+
   //
-  uint8_t r_buffer[BUFFER_SIZE];
-  uint8_t eeprom_buffer[BUFFER_SIZE];
-  uint16_t i, n;
+  uint8_t c;
+  char r_message[BUFFER_SIZE];
+  int i;
+  answer_send("MSG: Ready to Listen!\n");
   while(1) {
-    answer_send("MSG: Now waiting for request..\n", uart);
-    Request req;
-    memset(r_buffer, 0, BUFFER_SIZE);  //clear the buffer where we read the Request to, each time
-    for (i=0; i<R_DIM; ++i) {
-      uint8_t c=UART_getChar(uart);
-      r_buffer[i]=c;
+    //memset(r_message, 0, BUFFER_SIZE);
+
+    i=0;
+    while(1){
+      c=UART_getChar(uart);
+      answer_send("Please wait..\n");
+      if (i==0 && c!='a' && c!='b' && c!='q') continue;
+      r_message[i]=c;
+      ++i;
+      r_message[i]='\0';
+      if (c=='\n' || c=='\0') break;
     }
-    memcpy((void*)&req, (void*)r_buffer, R_DIM);  //deserialize
-    if ((&req)->type==SetTimer) {
-      answer_send("MSG: Request to reset the log-writing period of the timer received..\n", uart);
-      Timer_stop();
-      Timer_create((uint16_t)(&req)->duration_s * 1000, timerFn, (void*)ar);
-      Timer_start(timer);
-      answer_send("MSG: Done. New period is: k seconds\n", uart);
+
+    if (r_message[0]=='a') {
+      //Timer_stop(timer);
+      answer_send("Log Request recieved..\n");
+
+      int buf[40];
+      //memset(buf, 0, 40);
+      DHT_readSensor(buf, DHT_PIN);
+
+      uint8_t h = bits2byte(buf);
+      uint8_t t = bits2byte(buf + 16);
+
+      //send log
+      char mesg[BUFFER_SIZE];
+      //memset(mesg, 0, BUFFER_SIZE);
+      sprintf(mesg, "Instant LOG: %d Temperature: %d Humidity: %d\n", N_LOG, t, h);
+      answer_send(mesg);
+      ++N_LOG;
+
+      //tick=0;
+      //Timer_start(timer);
     }
-    else if ((&req)->type==LogRequest) {
-      answer_send("MSG: Request to send the sequence of the log registrated till now received..\n", uart);
-      if (eeprom->LOG_NUMBER==0) answer_send("MSG: no log found.. Going to skip..\n", uart);
-      else {
-      n=eeprom->LOG_NUMBER;
-      memset(mesg, 0, BUFFER_SIZE);
-      sprintf(mesg, "MSG: %d logs found.. Going to send 1 log per second..\n", n);
-      answer_send(mesg, uart);
-      for(i=0; i<n; ++i) {
-        //read a log from eeprom
-        memset(eeprom_buffer, 0, BUFFER_SIZE);  //clear the buffer where we read the log to, each time
-        if (EEPROM_read((void*)eeprom_buffer, LOG_DIM, eeprom)) {
-          --eeprom->LOG_NUMBER;
-          LOG l;
-          memcpy((void*)&l, (void*)eeprom_buffer, LOG_DIM);
-          memset(mesg, 0, BUFFER_SIZE);
-          sprintf(mesg, "LOG: %d Temperature: %d Humidity: %d\n", (&l)->n, (&l)->temperature, (&l)->humidity);
-          answer_send(mesg, uart);
-        }
-        _delay_ms(1000); //wait 1 sec
+    else if (r_message[0]=='b') {
+      Timer_stop(timer);
+      answer_send("Timer Set Request recieved..\n");
+      //memset(r_message, 0, BUFFER_SIZE);
+
+      i=0;
+      while(1){
+        c=UART_getChar(uart);
+        answer_send("Please wait..\n");
+        if (i==0 && c!='a' && c!='b' && c!='c') continue;
+        r_message[i]=c;
+        ++i;
+        r_message[i]='\0';
+        if (c=='\n' || c=='\0') break;
       }
-      answer_send("MSG: Done. Senging sequence terminated successfully..\n", uart);
+
+      if (r_message[0]=='a') timer_duration=30;
+      else if (r_message[0]=='b') timer_duration=60;
+      else if (r_message[0]=='c') timer_duration=120;
+
+      tick=0;
+      //timer=Timer_create(timerFn, (void*) &tick);
+      Timer_start(timer);
     }
-    answer_send("MSG: In loop.. waiting 5 sec..\n", uart);
-    _delay_ms(5000); //wait 5 sec
+
+    answer_send("MSG: Going to wait 10 seconds..\n");
+    _delay_ms(10000); //wait 10 sec
   }
 }

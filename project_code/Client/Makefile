@@ -2,9 +2,9 @@ CC = gcc
 CC_OPTS = -Wall -g --std=gnu99
 LIBS = -lpthread
 
-INCLUDES = serial_linux.h client_protocol.h
+INCLUDES = serial_linux.h
 
-OBJS = serial_linux.o client_protocol.o
+OBJS = serial_linux.o
 
 BINS = client.run
 
